@@ -151,7 +151,7 @@ export const helloWorld = inngest.createFunction(
 
     return {
       url: sandboxUrl,
-      title: "Fragment",
+      title: "Fragments",
       files: result.state.data.files,
       summary: result.state.data.summary,
     };
