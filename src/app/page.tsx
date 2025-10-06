@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
 import { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/compat/router";
 
 const Page  = () => {
   const router = useRouter();
@@ -18,7 +18,9 @@ const Page  = () => {
       toast.error(error.message);
     },
     onSuccess: (data) => {
-      router.push(`/projects/${data.id}`);
+      if (router) {
+        router.push(`/projects/${data.id}`);
+      }
     }
   }));
 
