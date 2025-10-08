@@ -1,5 +1,5 @@
 import { getQueryClient, trpc } from "@/trpc/server";
-import { ProjectView } from "../ui/views/project-view";
+import { ProjectView } from "../components/views/project-view";
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { Suspense } from "react";
 

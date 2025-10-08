@@ -5,9 +5,10 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { MessagesContainer } from "../components/messages-container";
+import { MessagesContainer } from "../ui/messages-container";
 import { Fragment } from "@/generated/prisma";
-import { ProjectHeader } from "../components/project-header";
+import { ProjectHeader } from "../ui/project-header";
+import { FragmentWeb } from "../ui/fragment-web";
 
 
 interface Props {
@@ -40,7 +41,7 @@ return (
         defaultSize={65}
         minSize={50}
         >
-         TODO: Preview   
+         {!!activeFragment && <FragmentWeb data={activeFragment} />}
         </ResizablePanel>
        </ResizablePanelGroup>
     </div>
