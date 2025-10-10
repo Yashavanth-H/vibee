@@ -15,6 +15,7 @@ import { FragmentWeb } from "../components/fragment-web";
 import { EyeIcon, CodeIcon, CrownIcon} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FileExplorer } from "@/components/file-explorer";
+import { UserControl } from "@/components/user-control";
 
 
 interface Props {
@@ -69,6 +70,7 @@ return (
                         <CrownIcon /> Upgrade
                         </Link>
                     </Button>
+                    <UserControl />
                 </div>
             </div>
             <TabsContent value="preview">
