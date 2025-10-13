@@ -42,14 +42,22 @@ export const ProjectFolder = () => {
             );
             router.push(`/projects/${data.id}`);
             //TODO reinvalidate usage status
+            queryClient.invalidateQueries(
+                trpc.usage.status.queryOptions(),
+            )
         },
         onError: (error) => {
+
+            toast.error(error.message);
            
             if(error.data?.code === "UNAUTHORIZED"){
                 clerk.openSignIn();
             }
 
-            toast.error(error.message);
+            if(error.data?.code === "TOO_MANY_REQUESTS"){
+                router.push("/pricing");
+            }
+            
         }
     }))
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
