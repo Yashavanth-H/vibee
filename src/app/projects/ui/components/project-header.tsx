@@ -28,7 +28,7 @@ interface Props {
     projectId: string;
 }
 
-export const ProjectHeader = ({ projectId} : Props) => {
+export const ProjectHeader = ({ projectId } : Props) => {
     const trpc = useTRPC();
     const { data: project} = useSuspenseQuery(
         trpc.projects.getOne.queryOptions({id: projectId })
