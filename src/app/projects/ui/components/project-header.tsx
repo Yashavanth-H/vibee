@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuPortal,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
@@ -22,7 +23,6 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 
 interface Props {
     projectId: string;
@@ -42,42 +42,44 @@ export const ProjectHeader = ({ projectId } : Props) => {
                     <Button 
                     variant="ghost"
                     size="sm"
-                    className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2!">
+                    className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2">
                         <Image src="/logo.svg" alt="Vibee" width={18} height={18} />
                         <span className="text-sm font-medium">{project.name}</span>
                         <ChevronDownIcon />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuItem asChild>
-                    <Link href="/">
-                    <ChevronLeftIcon />
-                    <span>
-                        Go to Dashboard
-                    </span>
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="gap-2">
-                        <SunMoonIcon className="size-4 text-muted-foreground"/>
-                        <span>Apperance</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                        <DropdownMenuSubContent>
-                            <DropdownMenuRadioGroup value={theme} onValueChange={() => {setTheme}}>
-                                <DropdownMenuRadioItem value="light" >
-                                    <span>Light</span>
-                                </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="Dark" >
-                                    <span>Dark</span>
-                                </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="System" >
-                                    <span>System</span>
-                                </DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                </DropdownMenuSub>
+                <DropdownMenuContent>
+                    <DropdownMenuItem asChild>
+                        <Link href="/">
+                        <ChevronLeftIcon />
+                        <span>
+                            Go to Dashboard
+                        </span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="gap-2">
+                            <SunMoonIcon className="size-4 text-muted-foreground"/>
+                            <span>Appearance</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                                <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}>
+                                    <DropdownMenuRadioItem value="light" >
+                                        <span>Light</span>
+                                    </DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="dark" >
+                                        <span>Dark</span>
+                                    </DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="system" >
+                                        <span>System</span>
+                                    </DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                </DropdownMenuContent>
             </DropdownMenu>
         </header>
     );

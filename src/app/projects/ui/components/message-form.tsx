@@ -1,3 +1,4 @@
+"use client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { z, infer } from "zod";
@@ -11,7 +12,7 @@ import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
 import { Usage } from "./usage";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface Props {
     projectId: string;
@@ -72,7 +73,7 @@ export const MessageForm = ({ projectId}: Props) => {
         <Form {...form}>
             {showUsage && (
                 <Usage 
-                points={usage.consumedPoints}
+                points={usage.remainingPoints}
                 msBeforeNext={usage.msBeforeNext}/>
             )}
             <form

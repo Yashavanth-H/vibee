@@ -61,12 +61,12 @@ return (
          onValueChange={(value) => setTabState(value as "preview" | "code")}
          >
             <div className="w-full flex items-center p-2 border-b gap-x-2">
-                <TabsList className="h-0 p-0 border rounded-md">
+                <TabsList className="h-auto p-0 border rounded-md">
                     <TabsTrigger value="preview" className="rounded-md">
                         <EyeIcon /><span>Demo</span>
                     </TabsTrigger>
                     <TabsTrigger value="code" className="rounded-md">
-                        <CodeIcon /><span>code</span>
+                        <CodeIcon /><span>Code</span>
                     </TabsTrigger>
                 </TabsList>
                 <div className="ml-auto flex items-center gap-x-2">
