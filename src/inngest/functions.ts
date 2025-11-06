@@ -1,11 +1,9 @@
-import { gemini, createAgent, createTool, createNetwork, type Tool, type Message, createState} from "@inngest/agent-kit";
+import { gemini,openai, createAgent, createTool, createNetwork, type Tool, type Message, createState} from "@inngest/agent-kit";
 import { inngest } from "./client";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent, parseAgentOutput } from "./utils";
-import z, { file, object } from "zod";
+import z from "zod";
 import { PROMPT, FRAGMENT_TITLE_PROMPT,RESPONSE_PROMPT } from "@/prompt";
-import { url } from "inspector";
-import { title } from "process";
 import { prisma } from "@/lib/db";
 
 interface AgentState {
@@ -23,6 +21,7 @@ export const codeAgentFunction = inngest.createFunction(
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("vibe-nextjs-testyash-2");
+      await sandbox.setTimeout(60_000 * 10 * 3);
       return sandbox.sandboxId;
     });
 
@@ -36,7 +35,10 @@ export const codeAgentFunction = inngest.createFunction(
         orderBy: {
           createdAt: "desc",
         },
+        take: 5,
       });
+
+
 
       for (const message of messages) {
         formattedMessages.push({
@@ -46,7 +48,7 @@ export const codeAgentFunction = inngest.createFunction(
         })
       }
 
-      return formattedMessages;
+      return formattedMessages.reverse();
     });
 
     const state = createState<AgentState>(
@@ -63,7 +65,11 @@ export const codeAgentFunction = inngest.createFunction(
       name: "code-agent",
       description: "An expert coding agent",
       system: PROMPT,
-      model: gemini({ model:"gemini-2.5-flash"}),
+      model: openai({
+        model: "minimax/minimax-m2:free",
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseUrl: "https://openrouter.ai/api/v1",
+      }),
       tools: [
         createTool({
           name: "terminal",
@@ -157,8 +163,12 @@ export const codeAgentFunction = inngest.createFunction(
           lastAssistantTextMessageContent(result);
 
           if(lastAssistantMessageText && network) {
-            if(lastAssistantMessageText.includes("<Text_summary>")) {
-              network.state.data.summary = lastAssistantMessageText;
+            if(lastAssistantMessageText.includes("<task_summary>")) {
+              // Extract only the content between <task_summary> and </task_summary> tags
+              const taskSummaryMatch = lastAssistantMessageText.match(/<task_summary>([\s\S]*?)<\/task_summary>/);
+              if (taskSummaryMatch && taskSummaryMatch[1]) {
+                network.state.data.summary = taskSummaryMatch[1].trim();
+              }
             }
           }
 
@@ -226,7 +236,7 @@ export const codeAgentFunction = inngest.createFunction(
         return await prisma.message.create({
           data: {
             projectId: event.data.projectId,
-            content: "Something went wrong.Plesae try again",
+            content: "Something went wrong. Please try again",
             role: "ASSISTANT",
             type: "ERROR",
           },

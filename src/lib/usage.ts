@@ -7,7 +7,7 @@ const FREE_POINTS = 5;
 
 const PRO_POINTS = 100;
 
-const DURATION = 30 * 24 * 60 * 60; // 30 days 
+const DURATION = 30 * 24 * 60 * 60; // 30 days
 
 const GENERATION_COST = 1;
 
@@ -31,7 +31,7 @@ export async function consumeCredits() {
     if(!userId){
         throw new Error("User not authenticated");
     }
-    
+
     const usageTracker = await getUsageTracker();
     const result = await usageTracker.consume(userId, GENERATION_COST);
     return result;
@@ -47,4 +47,4 @@ export async function getUsageStatus() {
     const usageTracker = await getUsageTracker();
     const result = await usageTracker.get(userId);
     return result;
-}; 
+};

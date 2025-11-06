@@ -20,35 +20,33 @@ model Project{
   userId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   messages Message[]
 }
 
-enum MessageRole{
-  USER 
+enum MessageRole {
+  USER
   ASSISTANT
 }
 
-enum MessageType{
+enum MessageType {
   RESULT
   ERROR
 }
 
-model Message{
-  id String @id @default(uuid())
+model Message {
+  id  String   @id @default(uuid())
   content String
   role MessageRole
   type MessageType
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  projectId String 
+  projectId String @db.Uuid
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
   fragment Fragment?
 }
 
-model Fragment{
+model Fragment {
   id String @id @default(uuid())
   messageId String @unique
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
@@ -58,11 +56,12 @@ model Fragment{
   files Json
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updateAt DateTime @updatedAt
 }
 
-model Usage {
+
+model Usage{
   key String @id
   points Int
-  expire DateTime
+  expire DateTime?
 }
