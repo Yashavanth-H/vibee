@@ -164,11 +164,7 @@ export const codeAgentFunction = inngest.createFunction(
 
           if(lastAssistantMessageText && network) {
             if(lastAssistantMessageText.includes("<task_summary>")) {
-              // Extract only the content between <task_summary> and </task_summary> tags
-              const taskSummaryMatch = lastAssistantMessageText.match(/<task_summary>([\s\S]*?)<\/task_summary>/);
-              if (taskSummaryMatch && taskSummaryMatch[1]) {
-                network.state.data.summary = taskSummaryMatch[1].trim();
-              }
+              network.state.data.summary = lastAssistantMessageText;
             }
           }
 

@@ -23,11 +23,11 @@ const Page = async ({params}: Props) => {
     console.log(projectId);
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-           
+            <ErrorBoundary fallback={<p>Error!</p>}>
                 <Suspense fallback={<p>loading...</p>}>
                     <ProjectView projectId={projectId}/>
                 </Suspense>
-
+            </ErrorBoundary>
         </HydrationBoundary>
     )
 }
