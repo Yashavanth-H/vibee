@@ -5,27 +5,28 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
 
 
-interface Props{
+interface Props {
     params: {
         projectsId: string;
     }
 }
 
-const Page = async ({params}: Props) => {
-    const projectId = params.projectsId;
+const Page = async ({ params }: Props) => {
+    const { projectsId } = await params;
+    const projectId = projectsId;
     const queryClient = getQueryClient();
     void queryClient.prefetchQuery(trpc.messages.getMany.queryOptions({
         projectId
     }))
     void queryClient.prefetchQuery(trpc.projects.getOne.queryOptions({
-        id:projectId
+        id: projectId
     }))
     console.log(projectId);
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
             <ErrorBoundary fallback={<p>Error!</p>}>
                 <Suspense fallback={<p>loading...</p>}>
-                    <ProjectView projectId={projectId}/>
+                    <ProjectView projectId={projectId} />
                 </Suspense>
             </ErrorBoundary>
         </HydrationBoundary>
