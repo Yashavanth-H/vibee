@@ -145,7 +145,7 @@ export const codeAgentFunction = inngest.createFunction(
             return await step?.run("readFiles", async () => {
               try {
                 const sandbox = await getSandbox(sandboxId);
-                const contents = [];
+                const contents: { path: string; content: string }[] = [];
                 for (const file of files) {
                   const content = await sandbox.files.read(file);
                   contents.push({ path: file, content });
@@ -190,6 +190,7 @@ export const codeAgentFunction = inngest.createFunction(
       },
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await network.run(event.data.value, { state, step } as any);
 
     const fragmentTitleGenerator = createAgent({
