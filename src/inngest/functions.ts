@@ -190,7 +190,7 @@ export const codeAgentFunction = inngest.createFunction(
       },
     });
 
-    const result = await network.run(event.data.value, { state });
+    const result = await network.run(event.data.value, { state, step } as any);
 
     const fragmentTitleGenerator = createAgent({
       name: "fragment-title-generator",
