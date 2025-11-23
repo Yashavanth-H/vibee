@@ -18,10 +18,10 @@ export const codeAgentFunction = inngest.createFunction(
 
   async ({ event, step }) => {
     console.log("Code Agent Function Started");
+
+    // Safety check for the step object
     if (!step) {
-      console.error("CRITICAL: step is undefined in function arguments");
-    } else {
-      console.log("step object is defined");
+      throw new Error("CRITICAL: 'step' is undefined in the function arguments. This is an internal Inngest error.");
     }
 
     const sandboxId = await step.run("get-sandbox-id", async () => {
@@ -80,12 +80,12 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             command: z.string(),
           }),
-          // UPDATED: Safe access to step. Uses context step if available, falls back to closure step.
-          handler: async ({ command }, context) => {
-            const stepToUse = (context as any)?.step || step;
-            if (!stepToUse) throw new Error("Step not available in terminal tool");
+          // Use the closure 'step' directly. Do not rely on context injection.
+          handler: async ({ command }) => {
+            // Explicitly checking closure capture
+            if (!step) throw new Error("Step is lost in closure");
 
-            return await stepToUse.run("terminal", async () => {
+            return await step.run("terminal", async () => {
               const buffers = { stdout: "", stderr: "" };
 
               try {
@@ -119,18 +119,10 @@ export const codeAgentFunction = inngest.createFunction(
               }),
             ),
           }),
-          // UPDATED: Safe access to step.
-          handler: async (
-            { files },
-            context: Tool.Options<AgentState>
-          ) => {
-            const stepToUse = (context as any)?.step || step;
-            if (!stepToUse) throw new Error("Step not available in createOrUpdateFiles");
+          handler: async ({ files }, { network }) => {
+            if (!step) throw new Error("Step is lost in closure");
 
-            // Ensure network exists in context (it should)
-            const network = context.network;
-
-            const newFiles = await stepToUse.run("createOrUpdateFiles", async () => {
+            const newFiles = await step.run("createOrUpdateFiles", async () => {
               try {
                 const updatedFiles = network?.state?.data?.files || {};
                 const sandbox = await getSandbox(sandboxId);
@@ -155,12 +147,10 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             files: z.array(z.string()),
           }),
-          // UPDATED: Safe access to step.
-          handler: async ({ files }, context) => {
-            const stepToUse = (context as any)?.step || step;
-            if (!stepToUse) throw new Error("Step not available in readFiles");
+          handler: async ({ files }) => {
+            if (!step) throw new Error("Step is lost in closure");
 
-            return await stepToUse.run("readFiles", async () => {
+            return await step.run("readFiles", async () => {
               try {
                 const sandbox = await getSandbox(sandboxId);
                 const contents: { path: string; content: string }[] = [];
@@ -208,8 +198,9 @@ export const codeAgentFunction = inngest.createFunction(
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await network.run(event.data.value, { state, step } as any);
+    // CRITICAL FIX: Do NOT pass 'step' here. It causes serialization errors.
+    // The tools above will use the 'step' from the closure, which is standard for Inngest.
+    const result = await network.run(event.data.value, { state });
 
     const fragmentTitleGenerator = createAgent({
       name: "fragment-title-generator",
