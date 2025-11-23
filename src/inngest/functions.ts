@@ -11,9 +11,6 @@ interface AgentState {
   files: { [path: string]: string };
 }
 
-
-
-
 export const codeAgentFunction = inngest.createFunction(
   { id: "code-agent" },
   { event: "code-agent/run" },
@@ -45,14 +42,12 @@ export const codeAgentFunction = inngest.createFunction(
         take: 5,
       });
 
-
-
       for (const message of messages) {
         formattedMessages.push({
           type: "text",
           role: message.role === "ASSISTANT" ? "assistant" : "user",
           content: message.content,
-        })
+        });
       }
 
       return formattedMessages.reverse();
@@ -84,7 +79,10 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             command: z.string(),
           }),
-          handler: async ({ command }) => {
+          // UPDATED: Destructuring step from options
+          handler: async ({ command }, { step }) => {
+            if (!step) throw new Error("Step not available in terminal tool");
+
             return await step.run("terminal", async () => {
               const buffers = { stdout: "", stderr: "" };
 
@@ -96,7 +94,7 @@ export const codeAgentFunction = inngest.createFunction(
                   },
                   onStderr: (data: string) => {
                     buffers.stderr += data;
-                  }
+                  },
                 });
                 return result.stdout;
               } catch (e) {
@@ -119,10 +117,13 @@ export const codeAgentFunction = inngest.createFunction(
               }),
             ),
           }),
+          // UPDATED: Destructuring step from options
           handler: async (
             { files },
-            { network }: Tool.Options<AgentState>
+            { network, step }: Tool.Options<AgentState>
           ) => {
+            if (!step) throw new Error("Step not available in createOrUpdateFiles");
+
             const newFiles = await step.run("createOrUpdateFiles", async () => {
               try {
                 const updatedFiles = network.state.data.files || {};
@@ -148,7 +149,10 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             files: z.array(z.string()),
           }),
-          handler: async ({ files }) => {
+          // UPDATED: Destructuring step from options
+          handler: async ({ files }, { step }: Tool.Options<AgentState>) => {
+            if (!step) throw new Error("Step not available in readFiles");
+
             return await step.run("readFiles", async () => {
               try {
                 const sandbox = await getSandbox(sandboxId);
@@ -197,7 +201,8 @@ export const codeAgentFunction = inngest.createFunction(
       },
     });
 
-    const result = await network.run(event.data.value, { state });
+    // UPDATED: Added `step` to the second argument
+    const result = await network.run(event.data.value, { state, step } as any);
 
     const fragmentTitleGenerator = createAgent({
       name: "fragment-title-generator",
@@ -220,6 +225,7 @@ export const codeAgentFunction = inngest.createFunction(
     const {
       output: fragmentTitleOutput
     } = await fragmentTitleGenerator.run(result.state.data.summary);
+
     const {
       output: responseOutput
     } = await responseGenerator.run(result.state.data.summary);
@@ -264,6 +270,7 @@ export const codeAgentFunction = inngest.createFunction(
         },
       })
     });
+
     return {
       url: sandboxUrl,
       title: "Fragments",
