@@ -19,6 +19,13 @@ export const codeAgentFunction = inngest.createFunction(
   { event: "code-agent/run" },
 
   async ({ event, step }) => {
+    console.log("Code Agent Function Started");
+    if (!step) {
+      console.error("CRITICAL: step is undefined in function arguments");
+    } else {
+      console.log("step object is defined");
+    }
+
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("vibe-nextjs-testyash-2");
       await sandbox.setTimeout(60_000 * 10 * 3);
