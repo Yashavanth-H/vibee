@@ -15,7 +15,7 @@ interface AgentState {
 
 
 export const codeAgentFunction = inngest.createFunction(
-  { id: "cde-agent" },
+  { id: "code-agent" },
   { event: "code-agent/run" },
 
   async ({ event, step }) => {
