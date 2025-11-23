@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { gemini, openai, createAgent, createTool, createNetwork, type Tool, type Message, createState } from "@inngest/agent-kit";
 import { inngest } from "./client";
 import { Sandbox } from "@e2b/code-interpreter";
@@ -79,11 +80,12 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             command: z.string(),
           }),
-          // UPDATED: Destructuring step from options
-          handler: async ({ command }, { step }) => {
-            if (!step) throw new Error("Step not available in terminal tool");
+          // UPDATED: Safe access to step. Uses context step if available, falls back to closure step.
+          handler: async ({ command }, context) => {
+            const stepToUse = (context as any)?.step || step;
+            if (!stepToUse) throw new Error("Step not available in terminal tool");
 
-            return await step.run("terminal", async () => {
+            return await stepToUse.run("terminal", async () => {
               const buffers = { stdout: "", stderr: "" };
 
               try {
@@ -117,16 +119,20 @@ export const codeAgentFunction = inngest.createFunction(
               }),
             ),
           }),
-          // UPDATED: Destructuring step from options
+          // UPDATED: Safe access to step.
           handler: async (
             { files },
-            { network, step }: Tool.Options<AgentState>
+            context: Tool.Options<AgentState>
           ) => {
-            if (!step) throw new Error("Step not available in createOrUpdateFiles");
+            const stepToUse = (context as any)?.step || step;
+            if (!stepToUse) throw new Error("Step not available in createOrUpdateFiles");
 
-            const newFiles = await step.run("createOrUpdateFiles", async () => {
+            // Ensure network exists in context (it should)
+            const network = context.network;
+
+            const newFiles = await stepToUse.run("createOrUpdateFiles", async () => {
               try {
-                const updatedFiles = network.state.data.files || {};
+                const updatedFiles = network?.state?.data?.files || {};
                 const sandbox = await getSandbox(sandboxId);
                 for (const file of files) {
                   await sandbox.files.write(file.path, file.content);
@@ -138,7 +144,7 @@ export const codeAgentFunction = inngest.createFunction(
               }
             });
 
-            if (typeof newFiles === "object") {
+            if (typeof newFiles === "object" && network?.state?.data) {
               network.state.data.files = newFiles;
             }
           }
@@ -149,11 +155,12 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             files: z.array(z.string()),
           }),
-          // UPDATED: Destructuring step from options
-          handler: async ({ files }, { step }: Tool.Options<AgentState>) => {
-            if (!step) throw new Error("Step not available in readFiles");
+          // UPDATED: Safe access to step.
+          handler: async ({ files }, context) => {
+            const stepToUse = (context as any)?.step || step;
+            if (!stepToUse) throw new Error("Step not available in readFiles");
 
-            return await step.run("readFiles", async () => {
+            return await stepToUse.run("readFiles", async () => {
               try {
                 const sandbox = await getSandbox(sandboxId);
                 const contents: { path: string; content: string }[] = [];
@@ -201,7 +208,7 @@ export const codeAgentFunction = inngest.createFunction(
       },
     });
 
-    // UPDATED: Added `step` to the second argument
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await network.run(event.data.value, { state, step } as any);
 
     const fragmentTitleGenerator = createAgent({
