@@ -77,8 +77,8 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             command: z.string(),
           }),
-          handler: async ({ command }, { step }) => {
-            return await step?.run("terminal", async () => {
+          handler: async ({ command }) => {
+            return await step.run("terminal", async () => {
               const buffers = { stdout: "", stderr: "" };
 
               try {
@@ -114,9 +114,9 @@ export const codeAgentFunction = inngest.createFunction(
           }),
           handler: async (
             { files },
-            { step, network }: Tool.Options<AgentState>
+            { network }: Tool.Options<AgentState>
           ) => {
-            const newFiles = await step?.run("createOrUpdateFiles", async () => {
+            const newFiles = await step.run("createOrUpdateFiles", async () => {
               try {
                 const updatedFiles = network.state.data.files || {};
                 const sandbox = await getSandbox(sandboxId);
@@ -141,8 +141,8 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             files: z.array(z.string()),
           }),
-          handler: async ({ files }, { step }) => {
-            return await step?.run("readFiles", async () => {
+          handler: async ({ files }) => {
+            return await step.run("readFiles", async () => {
               try {
                 const sandbox = await getSandbox(sandboxId);
                 const contents: { path: string; content: string }[] = [];
@@ -190,8 +190,7 @@ export const codeAgentFunction = inngest.createFunction(
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await network.run(event.data.value, { state, step } as any);
+    const result = await network.run(event.data.value, { state });
 
     const fragmentTitleGenerator = createAgent({
       name: "fragment-title-generator",
