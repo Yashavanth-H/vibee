@@ -6,9 +6,9 @@ import { Suspense } from "react";
 
 
 interface Props {
-    params: {
+    params: Promise<{
         projectsId: string;
-    }
+    }>
 }
 
 const Page = async ({ params }: Props) => {

@@ -5,7 +5,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import {
     ChevronDownIcon,
     ChevronLeftIcon,
-    EditIcon,
     SunMoonIcon,
 } from "lucide-react";
 import { useTRPC } from "@/trpc/client";
@@ -28,10 +27,10 @@ interface Props {
     projectId: string;
 }
 
-export const ProjectHeader = ({ projectId } : Props) => {
+export const ProjectHeader = ({ projectId }: Props) => {
     const trpc = useTRPC();
-    const { data: project} = useSuspenseQuery(
-        trpc.projects.getOne.queryOptions({id: projectId })
+    const { data: project } = useSuspenseQuery(
+        trpc.projects.getOne.queryOptions({ id: projectId })
     );
 
     const { setTheme, theme } = useTheme();
@@ -39,10 +38,10 @@ export const ProjectHeader = ({ projectId } : Props) => {
         <header className="p-2 flex justify-between items-center border-b">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button 
-                    variant="ghost"
-                    size="sm"
-                    className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2">
                         <Image src="/logo.svg" alt="Vibee" width={18} height={18} />
                         <span className="text-sm font-medium">{project.name}</span>
                         <ChevronDownIcon />
@@ -51,16 +50,16 @@ export const ProjectHeader = ({ projectId } : Props) => {
                 <DropdownMenuContent>
                     <DropdownMenuItem asChild>
                         <Link href="/">
-                        <ChevronLeftIcon />
-                        <span>
-                            Go to Dashboard
-                        </span>
+                            <ChevronLeftIcon />
+                            <span>
+                                Go to Dashboard
+                            </span>
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuSub>
                         <DropdownMenuSubTrigger className="gap-2">
-                            <SunMoonIcon className="size-4 text-muted-foreground"/>
+                            <SunMoonIcon className="size-4 text-muted-foreground" />
                             <span>Appearance</span>
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
