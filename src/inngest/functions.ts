@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { gemini, openai, createAgent, createTool, createNetwork, type Tool, type Message, createState } from "@inngest/agent-kit";
+import { gemini, openai, createAgent, createTool, createNetwork, type Message, createState } from "@inngest/agent-kit";
 import { inngest } from "./client";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent, parseAgentOutput } from "./utils";
@@ -80,9 +79,8 @@ export const codeAgentFunction = inngest.createFunction(
           parameters: z.object({
             command: z.string(),
           }),
-          // Use the closure 'step' directly. Do not rely on context injection.
+          // Use the closure 'step' directly.
           handler: async ({ command }) => {
-            // Explicitly checking closure capture
             if (!step) throw new Error("Step is lost in closure");
 
             return await step.run("terminal", async () => {
@@ -198,8 +196,7 @@ export const codeAgentFunction = inngest.createFunction(
       },
     });
 
-    // CRITICAL FIX: Do NOT pass 'step' here. It causes serialization errors.
-    // The tools above will use the 'step' from the closure, which is standard for Inngest.
+    // We strictly do NOT pass 'step' here to avoid serialization errors.
     const result = await network.run(event.data.value, { state });
 
     const fragmentTitleGenerator = createAgent({
